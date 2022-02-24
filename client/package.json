@@ -1,0 +1,25 @@
+{
+    "name": "@adicitus/morrigan.client.providers.client",
+    "version": "1.0.5",
+    "description": "Client side of the 'Client' provider for the Morrigan management system.",
+    "main": "client.js",
+    "scripts": {
+      "test": "mocha --exit",
+      "start": "node server.js"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/Adicitus/js-clientsprovider-pkg.git"
+    },
+    "keywords": [
+      "morrigan"
+    ],
+    "author": "Joakim Olsson <joakim.olsson@adicitus.cloud>",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/Adicitus/js-clientsprovider-pkg/issues"
+    },
+    "homepage": "https://github.com/Adicitus/js-clientsprovider-pkg#readme",
+    "dependencies": { }
+  }
+  
