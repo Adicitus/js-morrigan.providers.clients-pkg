@@ -28,6 +28,7 @@ async function getClients() {
  * expiration date/time.
  * 
  * @param {string} clientId - ID to setup client resources for.
+ * @returns {string} Client authentication token. 
  */
 async function provisionClient(clientId){
 
@@ -56,6 +57,13 @@ async function provisionClient(clientId){
 
 }
 
+/**
+ * Removes any resources associated with the given clientId.
+ * 
+ * This will invalidate the clients authentication token.
+ * @param {string} clientId ID of the client to deprovision.
+ * @returns True if a client was deprovisioned, false otherwise.
+ */
 async function deprovisionClient(clientId) {
     let client = await getClient(clientId)
 
@@ -80,7 +88,7 @@ async function deprovisionClient(clientId) {
  * If verification was successful, the state will be 'success' and the object
  * will contain a field 'client' with the client specified by the token.
  * 
- * If verification was unsuccessful, there will be a 'reason' with a shot
+ * If verification was unsuccessful, there will be a 'reason' with a short
  * description of what went wrong.
  * 
  * @param {string} token - The token to verify.
@@ -104,6 +112,14 @@ module.exports.getClient        = getClient
 
 /* =========== Start Endpoint Definition ============== */
 
+/**
+ * Client provisioning endpoint handler.
+ * 
+ * Accepts a application/json body with a single field called 'id', which
+ * should contain the value to be used as the Client ID of the new client.
+ * @param {Object} req Request object.
+ * @param {Object} res Response object.
+ */
 async function ep_provisionClient(req, res) {
 
     let details = req.body
@@ -116,6 +132,18 @@ async function ep_provisionClient(req, res) {
     res.send(JSON.stringify(t))
 }
 
+/**
+ * GET Client endpoint handler.
+ * 
+ * Accepts a client ID as a request parameter, and if this is provided then
+ * only that client will be returned.
+ * 
+ * Returns status code 204 if a client ID was specified but no such client exists.
+ * 
+ * Returns status code 200 if there is client data to return.
+ * @param {Object} req Request object.
+ * @param {Object} res Response object.
+ */
 async function ep_getClients(req, res) {
 
     if (req.params) {
@@ -141,6 +169,20 @@ async function ep_getClients(req, res) {
     res.send(JSON.stringify(await getClients()))
 }
 
+/**
+ * Client deprovisioning endpoint handler.
+ * 
+ * Expects a client ID as a request parameter. If such a client exists,
+ * it will be removed.
+ * 
+ * Returns status code 400 if no client ID is provided.
+ * 
+ * Returns 200 if a client was removed.
+ * 
+ * Returns 204 if no client exists on the server.
+ * @param {Object} req Request object.
+ * @param {Object} res Response object.
+ */
 async function ep_deprovisionClient(req, res) {
     if (!req.params || !req.params.clientId) {
         res.status(400)
