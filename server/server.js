@@ -8,7 +8,6 @@ var tokens = null
 
 var log = null
 
-
 async function getClient(clientId) {
     return await clientRecords.findOne({ id: clientId })
 }
@@ -132,6 +131,54 @@ async function ep_provisionClient(req, res) {
     res.send(JSON.stringify(t))
 }
 
+ep_provisionClient.openapi = {
+    description: "Provisions a client entry on the system.",
+    post: {
+        tags: ['client_lifecycle'],
+        summary: "Provisions a new client entry for the given client ID.",
+        operationId: 'morrigan.server.providers.client.provision.post',
+        requestBody: {
+            description: "Should contain the ID of the client to provision.",
+            content: {
+                "application/json": {
+                    schema: {
+                        type: 'object',
+                        required: [
+                            'id'
+                        ],
+                        properties: {
+                            id: {
+                                type: 'string'
+                            }
+                        }
+                    },
+                    examples: {
+                        uuid: {
+                            summary: "Example using UUID.",
+                            value: {
+                                id: "c38b97f9-2fe5-49af-b5d3-ab9e6749f67d"
+                            }
+                        }
+                    }
+                }
+            },
+            required: true
+        },
+        responses: {
+            200: {
+                description: "Successfully provisioned the client ID.",
+                content: {
+                    "text/plain": {
+                        schema: {
+                            type: "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 /**
  * GET Client endpoint handler.
  * 
@@ -206,11 +253,95 @@ async function ep_deprovisionClient(req, res) {
 module.exports.name = 'client'
 
 module.exports.endpoints = [
-    {route: '/', method: 'get', handler: ep_getClients},
+    {route: '/', method: 'get', handler: ep_getClients, openapi: {
+        get: {
+            summary: "Retrieve all clients. If  clientID is specified a single client will be returned, otherwise returns a list of all clients.",
+            operationId: 'morrigan.server.providers.client.get',
+            responses: {
+                200: {
+                    description: "An array of all clients registered in the system.",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: 'array',
+                                items: {
+                                    $ref: '#/components/schemas/clientRecord'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }},
     {route: '/provision', method: 'post', handler: ep_provisionClient},
-    {route: '/:clientId', method: 'get', handler: ep_getClients},
+    {route: '/:clientId', method: 'get', handler: ep_getClients, openapi: {
+        get: {
+            summary: "Retrieve a specific client.",
+            operationId: 'morrigan.server.providers.client.get.byClientId',
+            parameters: [
+                {
+                    name: 'clientId',
+                    in: 'path',
+                    required: true,
+                    description: "The ID of the client to retrieve.",
+                    schema: {
+                        type: 'string',
+                    }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "A single client matching the specified ID.",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: 'array',
+                                items: {
+                                    $ref: '#/components/schemas/clientRecord'
+                                }
+                            }
+                        }
+                    }
+                },
+                404: {
+                    description: "No such client exists."
+                }
+            }
+        }
+    }},
     {route: '/:clientId', method: 'delete', handler: ep_deprovisionClient}
 ]
+
+module.exports.openapi = {
+    components: {
+        schemas: {
+            clientRecord: {
+                type: 'object',
+                required: [
+                    'id'
+                ],
+                properties: {
+                    id: {
+                        type: 'string',
+                        minLength: 1,
+                        description: "Externa ID assigned"
+                    },
+                    created: {
+                        type: 'string',
+                        readOnly: true,
+                        description: "Datetime when this client was provisioned."
+                    },
+                    updated: {
+                        type: 'string',
+                        readOnly: true,
+                        description: "Datetime when this client was last updated."
+                    }
+                }
+            }
+        }
+    }
+}
 
 module.exports.messages = {
     /**
