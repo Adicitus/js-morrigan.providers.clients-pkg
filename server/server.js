@@ -131,54 +131,6 @@ async function ep_provisionClient(req, res) {
     res.send(JSON.stringify(t))
 }
 
-ep_provisionClient.openapi = {
-    description: "Provisions a client entry on the system.",
-    post: {
-        tags: ['client_lifecycle'],
-        summary: "Provisions a new client entry for the given client ID.",
-        operationId: 'morrigan.server.providers.client.provision.post',
-        requestBody: {
-            description: "Should contain the ID of the client to provision.",
-            content: {
-                "application/json": {
-                    schema: {
-                        type: 'object',
-                        required: [
-                            'id'
-                        ],
-                        properties: {
-                            id: {
-                                type: 'string'
-                            }
-                        }
-                    },
-                    examples: {
-                        uuid: {
-                            summary: "Example using UUID.",
-                            value: {
-                                id: "c38b97f9-2fe5-49af-b5d3-ab9e6749f67d"
-                            }
-                        }
-                    }
-                }
-            },
-            required: true
-        },
-        responses: {
-            200: {
-                description: "Successfully provisioned the client ID.",
-                content: {
-                    "text/plain": {
-                        schema: {
-                            type: "string"
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 /**
  * GET Client endpoint handler.
  * 
@@ -253,9 +205,66 @@ async function ep_deprovisionClient(req, res) {
 module.exports.name = 'client'
 
 module.exports.endpoints = [
+    
+    {route: '/provision', method: 'post', handler: ep_provisionClient, openapi: {
+        description: "Provisions a client entry on the system.",
+        post: {
+            tags: ['Client', 'Client Lifecycle'],
+            summary: "Provisions a new client entry for the given client ID.",
+            operationId: 'morrigan.server.providers.client.provision.post',
+            requestBody: {
+                description: "Should contain the ID of the client to provision.",
+                content: {
+                    "application/json": {
+                        schema: {
+                            type: 'object',
+                            required: [
+                                'id'
+                            ],
+                            properties: {
+                                id: {
+                                    type: 'string'
+                                }
+                            }
+                        },
+                        examples: {
+                            uuid: {
+                                summary: "UUID",
+                                value: {
+                                    id: "9f39ea0c-610b-494e-a2f1-65faa5b75dc6"
+                                }
+                            },
+                            freetext: {
+                                summary: "Freetext",
+                                value: {
+                                    id: "MyComputer"
+                                }
+                            }
+                        }
+                    }
+                },
+                required: true
+            },
+            responses: {
+                200: {
+                    description: "Successfully provisioned the client ID.",
+                    content: {
+                        "text/plain": {
+                            schema: {
+                                type: "string",
+                                description: "Identity token (JWT) for the given ID."
+                            },
+                            example: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjZhNDlkYjhkLWMxM2MtNDVjOS1hMDE4LWQ5Yjg3MDY2OWFhYSJ9.eyJzdWIiOiI5ZjM5ZWEwYy02MTBiLTQ5NGUtYTJmMS02NWZhYTViNzVkYzYiLCJpc3MiOiJkZWQ3NGUyNC1lYzZhLTRkNzYtYWU2My03ZDc1NzE2M2VhOWQiLCJpYXQiOjE2NTkwODQzNDIsImV4cCI6MTY2MTY3NjM0Mn0.AAAAAIeTWWUi9AzCbVRqC3H0oT2H-ZYC-5to_zJE_g8AAAAAIPzPOxBZ8qhFVhAaLKOgA-CEN0352LNmhWqVzQ"
+                        }
+                    }
+                }
+            }
+        }
+    }},
     {route: '/', method: 'get', handler: ep_getClients, openapi: {
         get: {
-            summary: "Retrieve all clients. If  clientID is specified a single client will be returned, otherwise returns a list of all clients.",
+            tags: ['Client'],
+            summary: "Retrieve all clients.",
             operationId: 'morrigan.server.providers.client.get',
             responses: {
                 200: {
@@ -274,9 +283,9 @@ module.exports.endpoints = [
             }
         }
     }},
-    {route: '/provision', method: 'post', handler: ep_provisionClient},
     {route: '/:clientId', method: 'get', handler: ep_getClients, openapi: {
         get: {
+            tags: ['Client'],
             summary: "Retrieve a specific client.",
             operationId: 'morrigan.server.providers.client.get.byClientId',
             parameters: [
@@ -310,7 +319,32 @@ module.exports.endpoints = [
             }
         }
     }},
-    {route: '/:clientId', method: 'delete', handler: ep_deprovisionClient}
+    {route: '/:clientId', method: 'delete', handler: ep_deprovisionClient, openapi: {
+        delete: {
+            tags: ['Client', 'Client Lifecycle'],
+            summary: "Deprovisions the given client, removing it from the system and preventing further connections.",
+            operationId: 'morrigan.server.providers.client.provision.post',
+            parameters: [
+                {
+                    name: 'clientId',
+                    in: 'path',
+                    required: true,
+                    description: "The ID of the client to delete.",
+                    schema: {
+                        type: 'string',
+                    }
+                }
+            ],
+            responses: {
+                200: {
+                    description: "The indicated client was removed."
+                },
+                204: {
+                    description: "No such client exists."
+                }
+            }
+        }
+    }}
 ]
 
 module.exports.openapi = {
@@ -322,10 +356,15 @@ module.exports.openapi = {
                     'id'
                 ],
                 properties: {
+                    _id: {
+                        type: 'string',
+                        readOnly: true,
+                        description: "Internal ID of the client."
+                    },
                     id: {
                         type: 'string',
                         minLength: 1,
-                        description: "Externa ID assigned"
+                        description: "Assigned ID of the client."
                     },
                     created: {
                         type: 'string',
@@ -336,8 +375,20 @@ module.exports.openapi = {
                         type: 'string',
                         readOnly: true,
                         description: "Datetime when this client was last updated."
+                    },
+                    tokenId: {
+                        type: 'string',
+                        readOnly: true,
+                        description: "ID of the token corresponding to this client."
                     }
-                }
+                },
+                example: `{    
+                    "_id":  "62e39e36276f5f01b88dee83",
+                    "id":  "9f39ea0c-610b-494e-a2f1-65faa5b75dc6",                                                                                                                                                      "_id":  "62e39e36276f5f01b88dee83",                                                                                                                    "id":  "9f39ea0c-610b-494e-a2f1-65faa5b75dc6",
+                    "created":  "2022-07-29T08:45:42.826Z",
+                    "tokenId":  "6a49db8d-c13c-45c9-a018-d9b870669aaa",
+                    "updated":  "2022-07-29T08:45:42.856Z"
+                }`
             }
         }
     }
