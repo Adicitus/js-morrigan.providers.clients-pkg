@@ -37,7 +37,7 @@ module.exports.setup = (core) => {
     tokenPath = `${core.stateDir}/token`
     tokenExpirationPath = `${core.stateDir}/token.expiration`
 
-    if (!fs.existsSync(tokenPath) || (core.args.force && (core.args.token || core.args.tokenFile))) {
+    if (!fs.existsSync(tokenPath) || (core.args && core.args.force && (core.args.token || core.args.tokenFile))) {
         if (core.args.token) {
             token = core.args.token
         } else if (core.args.tokenFile && fs.existsSync(core.args.tokenFile)) {
@@ -51,7 +51,7 @@ module.exports.setup = (core) => {
         saveToken()
     } else {
 
-        if (core.args.token || core.args.tokenFile) {
+        if (core.args && (core.args.token || core.args.tokenFile)) {
             console.log('A token was specified on the command line, but there is already a token installed, the existing token will be used.')
             console.log('To install the new token, use the --force parameter.')
         }
