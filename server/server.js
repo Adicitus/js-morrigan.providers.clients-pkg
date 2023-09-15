@@ -384,7 +384,7 @@ module.exports.openapi = {
                 },
                 example: `{    
                     "_id":  "62e39e36276f5f01b88dee83",
-                    "id":  "9f39ea0c-610b-494e-a2f1-65faa5b75dc6",                                                                                                                                                      "_id":  "62e39e36276f5f01b88dee83",                                                                                                                    "id":  "9f39ea0c-610b-494e-a2f1-65faa5b75dc6",
+                    "id":  "9f39ea0c-610b-494e-a2f1-65faa5b75dc6",
                     "created":  "2022-07-29T08:45:42.826Z",
                     "tokenId":  "6a49db8d-c13c-45c9-a018-d9b870669aaa",
                     "updated":  "2022-07-29T08:45:42.856Z"

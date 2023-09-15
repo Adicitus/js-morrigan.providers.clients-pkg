@@ -1,6 +1,6 @@
 {
   "name": "@adicitus/morrigan.server.providers.client",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Server-side Clients provider for the Morrigan management system.",
   "main": "server.js",
   "scripts": {
@@ -21,10 +21,10 @@
   },
   "homepage": "https://github.com/Adicitus/js-clientsprovider-pkg#readme",
   "dependencies": {
-    "@adicitus/jwtgenerator": "^1.0.0",
+    "@adicitus/jwtgenerator": "^2.0.0",
     "luxon": "^2.3.0"
   },
   "devDependencies": {
-    "@adicitus/morrigan.server": "^0.5.2"
+    "@adicitus/morrigan.server": "^0.10.1"
   }
 }
